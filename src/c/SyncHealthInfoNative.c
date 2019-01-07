@@ -7,6 +7,13 @@ static Window *s_window_goals;
 static TextLayer *s_text_layer;
 static TextLayer *s_text_GoalNumber;
 
+static void watchface_update_proc(Layer *layer, GContext *ctx) {
+  int32_t angle_start = DEG_TO_TRIGANGLE(0);
+  int32_t angle_end = DEG_TO_TRIGANGLE(340);
+  GRect rect_bounds = layer_get_bounds(layer);
+  uint16_t inset_thickness = 10;
+  graphics_fill_radial(ctx, rect_bounds, GOvalScaleModeFitCircle, inset_thickness, angle_start, angle_end);
+}
 
 static void prv_select_click_handler(ClickRecognizerRef recognizer, void *context) {
   text_layer_set_text(s_text_layer, "Select");
@@ -35,6 +42,8 @@ static void prv_window_load(Window *window) {
   text_layer_set_font(s_text_layer, fonts_get_system_font(FONT_KEY_LECO_26_BOLD_NUMBERS_AM_PM));
   text_layer_set_text_alignment(s_text_layer, GTextAlignmentCenter);
   layer_add_child(window_layer, text_layer_get_layer(s_text_layer));
+
+  layer_set_update_proc(window_layer, watchface_update_proc);
 }
 
 static void prv_window_unload(Window *window) {

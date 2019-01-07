@@ -2,7 +2,7 @@
 #include "goalwindow.h"
 
 static Window *s_window;
-static Window *s_window_goals;
+static NumberWindow *s_window_goals;
 
 
 static TextLayer *s_text_layer;
@@ -23,9 +23,24 @@ static void watchface_update_proc(Layer *layer, GContext *ctx) {
 static void prv_select_click_handler(ClickRecognizerRef recognizer, void *context) {
   text_layer_set_text(s_text_layer, "Select");
 }
-
+void goal_selected(struct NumberWindow *numberWindow, void *context){
+  APP_LOG(APP_LOG_LEVEL_DEBUG, "GoalSelected");
+  window_stack_push((Window*)s_window, true);
+}
 static void prv_up_click_handler(ClickRecognizerRef recognizer, void *context) {
-  text_layer_set_text(s_text_layer, "Up");
+  // text_layer_set_text(s_text_layer, "Up");
+  s_window_goals = number_window_create("Set your golas!",
+                     (NumberWindowCallbacks){
+                      .decremented = NULL,
+                      .incremented = NULL,
+                      .selected = (NumberWindowCallback) goal_selected
+                      },
+                      context);
+  number_window_set_min(s_window_goals, 0);
+  number_window_set_value(s_window_goals, 8000);
+  number_window_set_max(s_window_goals, 20000);
+  number_window_set_min(s_window_goals, 1000);
+
 }
 
 static void prv_down_click_handler(ClickRecognizerRef recognizer, void *context) {
@@ -64,31 +79,21 @@ static void update_watchface(){
 static void tick_handler(struct tm *tick_time, TimeUnits units_changed) {
   update_watchface();
 }
-// static void update_time() {
-//   text_layer_set_text(s_text_layer, "some text");
-//
-//   // time_t temp = time(NULL);
-//   // struct tm *tick_time = localtime(&temp);
-//   // static char s_buffer[8];
-//   // strftime(s_buffer, sizeof(s_buffer), clock_is_24h_style() ?
-//   //                                         "%H:%M" : "%I:%M", tick_time);
-//   // text_layer_set_text(s_text_layer, s_buffer);
-// }
 
 
 
 static void prv_init(void) {
   s_window = window_create();
+
   window_set_click_config_provider(s_window, prv_click_config_provider);
   tick_timer_service_subscribe(MINUTE_UNIT, tick_handler);
   window_set_window_handlers(s_window, (WindowHandlers) {
     .load = prv_window_load,
     .unload = prv_window_unload,
   });
-  const bool animated = false;
+  const bool animated = true;
   window_stack_push(s_window, animated);
   tick_timer_service_subscribe(MINUTE_UNIT, tick_handler);
-
 }
 
 static void prv_deinit(void) {

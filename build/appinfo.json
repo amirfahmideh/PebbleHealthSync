@@ -1,0 +1,46 @@
+{
+    "targetPlatforms": [
+        "aplite", 
+        "basalt", 
+        "chalk", 
+        "diorite"
+    ], 
+    "displayName": "Sync Health Info", 
+    "name": "SyncHealthInfo", 
+    "messageKeys": {
+        "dummy": 10000
+    }, 
+    "companyName": "Amir Fahmideh", 
+    "enableMultiJS": true, 
+    "versionLabel": "1.0", 
+    "capabilities": [], 
+    "sdkVersion": "3", 
+    "appKeys": {
+        "dummy": 10000
+    }, 
+    "longName": "Sync Health Info", 
+    "shortName": "Sync Health Info", 
+    "watchapp": {
+        "watchface": false
+    }, 
+    "resources": {
+        "media": [
+            {
+                "type": "bitmap", 
+                "name": "action_bar_icon_up", 
+                "file": "images/action_bar_icon_up.png"
+            }, 
+            {
+                "type": "bitmap", 
+                "name": "action_bar_icon_check", 
+                "file": "images/action_bar_icon_check.png"
+            }, 
+            {
+                "type": "bitmap", 
+                "name": "action_bar_icon_down", 
+                "file": "images/action_bar_icon_down.png"
+            }
+        ]
+    }, 
+    "uuid": "65cc2e20-8534-43cf-ad97-e62fb14219dc"
+}

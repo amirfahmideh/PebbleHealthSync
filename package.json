@@ -1,0 +1,50 @@
+{
+  "name": "SyncHealthInfo",
+  "author": "Amir Fahmideh (http://whiz.ir)",
+  "version": "1.0.0",
+  "keywords": [
+    "pebble-app"
+  ],
+  "private": true,
+  "capabilities":[
+    "configurable",
+    "location"
+  ],
+  "pebble": {
+    "displayName": "Sync Health Info",
+    "uuid": "65cc2e20-8534-43cf-ad97-e62fb14219dc",
+    "sdkVersion": "3",
+    "enableMultiJS": true,
+    "targetPlatforms": [
+      "aplite",
+      "basalt",
+      "chalk",
+      "diorite"
+    ],
+    "watchapp": {
+      "watchface": false
+    },
+    "messageKeys": [
+      "dummy"
+    ],
+    "resources": {
+      "media": [
+        {
+         "file": "images/action_bar_icon_up.png",
+         "name": "action_bar_icon_up",
+         "type": "bitmap"
+       },
+       {
+         "file": "images/action_bar_icon_check.png",
+         "name": "action_bar_icon_check",
+         "type": "bitmap"
+       },
+       {
+         "file": "images/action_bar_icon_down.png",
+         "name": "action_bar_icon_down",
+         "type": "bitmap"
+       }
+      ]
+    }
+  }
+}

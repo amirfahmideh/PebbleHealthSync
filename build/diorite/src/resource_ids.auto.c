@@ -8,3 +8,4 @@
 uint32_t RESOURCE_ID_action_bar_icon_up = 1;
 uint32_t RESOURCE_ID_action_bar_icon_check = 2;
 uint32_t RESOURCE_ID_action_bar_icon_down = 3;
+uint32_t RESOURCE_ID_WARNING = 4;

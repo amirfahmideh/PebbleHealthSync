@@ -39,6 +39,11 @@
                 "type": "bitmap", 
                 "name": "action_bar_icon_down", 
                 "file": "images/action_bar_icon_down.png"
+            }, 
+            {
+                "type": "bitmap", 
+                "name": "WARNING", 
+                "file": "images/warning.png"
             }
         ]
     }, 

@@ -21,15 +21,16 @@ static void watchface_update_proc(Layer *layer, GContext *ctx) {
 }
 
 static void prv_select_click_handler(ClickRecognizerRef recognizer, void *context) {
-  text_layer_set_text(s_text_layer, "Select");
+  // text_layer_set_text(s_text_layer, "Select");
 }
 void goal_selected(struct NumberWindow *numberWindow, void *context){
   APP_LOG(APP_LOG_LEVEL_DEBUG, "GoalSelected");
+  number_window_destroy(s_window_goals);
   window_stack_push((Window*)s_window, true);
 }
 static void prv_up_click_handler(ClickRecognizerRef recognizer, void *context) {
   // text_layer_set_text(s_text_layer, "Up");
-  s_window_goals = number_window_create("Set your golas!",
+  s_window_goals = number_window_create("Walk Goal",
                      (NumberWindowCallbacks){
                       .decremented = NULL,
                       .incremented = NULL,
@@ -40,11 +41,13 @@ static void prv_up_click_handler(ClickRecognizerRef recognizer, void *context) {
   number_window_set_value(s_window_goals, 8000);
   number_window_set_max(s_window_goals, 20000);
   number_window_set_min(s_window_goals, 1000);
-
+  number_window_set_step_size(s_window_goals,500);
+  APP_LOG(APP_LOG_LEVEL_DEBUG, "Select Button Click!");
+  window_stack_push((Window*)s_window_goals, true);
 }
 
 static void prv_down_click_handler(ClickRecognizerRef recognizer, void *context) {
-  text_layer_set_text(s_text_layer, "Down");
+  // text_layer_set_text(s_text_layer, "Down");
 }
 
 static void prv_click_config_provider(void *context) {

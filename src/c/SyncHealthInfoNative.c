@@ -1,4 +1,5 @@
 #include <pebble.h>
+#include "goalwindow.h"
 
 static Window *s_window;
 static Window *s_window_goals;
@@ -11,6 +12,10 @@ static void watchface_update_proc(Layer *layer, GContext *ctx) {
   int32_t angle_start = DEG_TO_TRIGANGLE(0);
   int32_t angle_end = DEG_TO_TRIGANGLE(340);
   GRect rect_bounds = layer_get_bounds(layer);
+  rect_bounds.origin.x += 10;
+  rect_bounds.origin.y += 10;
+  rect_bounds.size.w -= 20;
+  rect_bounds.size.h -= 10;
   uint16_t inset_thickness = 10;
   graphics_fill_radial(ctx, rect_bounds, GOvalScaleModeFitCircle, inset_thickness, angle_start, angle_end);
 }
@@ -37,13 +42,12 @@ static void prv_window_load(Window *window) {
   Layer *window_layer = window_get_root_layer(window);
   GRect bounds = layer_get_bounds(window_layer);
 
-  s_text_layer = text_layer_create(GRect(0, 72, bounds.size.w, 40));
-  text_layer_set_text(s_text_layer, "Press a button");
+  s_text_layer = text_layer_create(GRect(25, 72, (bounds.size.w - 50), 40));
+  text_layer_set_text(s_text_layer, "");
   text_layer_set_font(s_text_layer, fonts_get_system_font(FONT_KEY_LECO_26_BOLD_NUMBERS_AM_PM));
   text_layer_set_text_alignment(s_text_layer, GTextAlignmentCenter);
-  layer_add_child(window_layer, text_layer_get_layer(s_text_layer));
-
   layer_set_update_proc(window_layer, watchface_update_proc);
+  layer_add_child(window_layer, text_layer_get_layer(s_text_layer));
 }
 
 static void prv_window_unload(Window *window) {

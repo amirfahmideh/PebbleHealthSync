@@ -3,6 +3,7 @@
 #include "goalwindow.h"
 #include "local_storage.h"
 #include "persiancalendar.h"
+// #include "worker/step_count_worker.c"
 
 static Window *s_window;
 static NumberWindow *s_window_goals;
@@ -13,6 +14,14 @@ static TextLayer *s_text_persianDate;
 static TextLayer *s_text_goalNumber;
 static TextLayer *s_text_todayStepNumber;
 static TextLayer *s_text_ofLabel;
+
+static void worker_message_handler(uint16_t type, AppWorkerMessage *data) {
+  static char s_buffer[32];
+  snprintf(s_buffer, sizeof(s_buffer), "%d", data->data2);
+  text_layer_set_text(s_text_todayStepNumber, s_buffer);
+  // Do something with the data
+  APP_LOG(APP_LOG_LEVEL_INFO, "got data %i %i %i", data->data0, data->data1, data->data2);
+}
 
 static void callOnGoalChanges(int newgoal){
   static char str_goalStep[8];
@@ -62,6 +71,8 @@ static void prv_click_config_provider(void *context) {
 }
 
 static void prv_window_load(Window *window) {
+
+
   Layer *window_layer = window_get_root_layer(window);
   GRect bounds = layer_get_bounds(window_layer);
 
@@ -136,6 +147,30 @@ static void tick_handler(struct tm *tick_time, TimeUnits units_changed) {
 }
 
 static void prv_init(void) {
+  // Subscribe to get AppWorkerMessages
+ app_worker_message_subscribe(worker_message_handler);
+ AppWorkerResult result = app_worker_launch();
+ switch(result) {
+   case APP_WORKER_RESULT_SUCCESS:
+     APP_LOG(APP_LOG_LEVEL_INFO, "started watchface %s", "Success");
+     break;
+   case APP_WORKER_RESULT_NOT_RUNNING:
+     APP_LOG(APP_LOG_LEVEL_INFO, "started watchface %s", "Not running");
+     break;
+   case APP_WORKER_RESULT_ALREADY_RUNNING:
+     APP_LOG(APP_LOG_LEVEL_INFO, "started watchface %s", "Already Running");
+     break;
+   case APP_WORKER_RESULT_NO_WORKER:
+     APP_LOG(APP_LOG_LEVEL_INFO, "started watchface %s", "No Worker");
+     break;
+   case APP_WORKER_RESULT_DIFFERENT_APP:
+     APP_LOG(APP_LOG_LEVEL_INFO, "started watchface %s", "Different App");
+     break;
+   case APP_WORKER_RESULT_ASKING_CONFIRMATION:
+     APP_LOG(APP_LOG_LEVEL_INFO, "started watchface %s", "Asking Confirmation");
+     break;
+ }
+ 
   s_window = window_create();
   window_set_click_config_provider(s_window, prv_click_config_provider);
   window_set_window_handlers(s_window, (WindowHandlers) {
@@ -150,6 +185,7 @@ static void prv_init(void) {
 static void prv_deinit(void) {
   window_destroy(s_window);
   number_window_destroy(s_window_goals);
+  app_worker_message_unsubscribe();
 }
 
 int main(void) {

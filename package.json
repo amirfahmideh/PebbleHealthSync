@@ -11,7 +11,7 @@
     "location"
   ],
   "pebble": {
-    "displayName": "Sync Health Info",
+    "displayName": "Health Sync",
     "uuid": "65cc2e20-8534-43cf-ad97-e62fb14219dc",
     "sdkVersion": "3",
     "enableMultiJS": true,

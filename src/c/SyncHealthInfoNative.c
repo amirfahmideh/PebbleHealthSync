@@ -15,6 +15,18 @@ static TextLayer *s_text_ofLabel;
 
 static int LastStepNumberFromBackground = 0;
 
+//Buzzzzź
+static void buzzAchieved(void){
+    uint32_t segments[] = {300, 150, 150, 120, 150, 300, 400};
+    //Create a VibePattern structure with the segments and length of the pattern as fields
+    VibePattern pattern = {
+        .durations = segments,
+        .num_segments = 7,//ARRAY_LENGTH(segments),
+    };
+    //Trigger the custom pattern to be executed
+    vibes_enqueue_custom_pattern(pattern);
+}
+
 //Set today date and time!
 static void setTodayTimeAndDate(TextLayer * text_time, TextLayer * text_date){
   time_t temp = time(NULL);
@@ -32,13 +44,10 @@ static void setTodayTimeAndDate(TextLayer * text_time, TextLayer * text_date){
 }
 
 static void worker_message_handler(uint16_t type, AppWorkerMessage *data) {
-
-  LastStepNumberFromBackground = data->data2;
+  LastStepNumberFromBackground = data->data0;
   static char s_buffer[32];
   snprintf(s_buffer, sizeof(s_buffer), "%d", LastStepNumberFromBackground);
   text_layer_set_text(s_text_todayStepNumber, s_buffer);
-  // Do something with the data
-  // APP_LOG(APP_LOG_LEVEL_INFO, "got data %i %i %i", data->data0, data->data1, data->data2);
 }
 
 static void callOnGoalChanges(int newgoal){

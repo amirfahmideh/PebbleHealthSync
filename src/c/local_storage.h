@@ -1,5 +1,5 @@
 #include <pebble.h>
-uint32_t GOAL_KEY_NUMBER = 10;
+uint32_t GOAL_KEY_NUMBER = 111;
 static void SaveGoalSteps(int goal_number)
 {
     persist_write_int(GOAL_KEY_NUMBER, goal_number);

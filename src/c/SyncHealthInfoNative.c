@@ -15,6 +15,19 @@ static TextLayer *s_text_ofLabel;
 
 static int LastStepNumberFromBackground = 0;
 
+static void buzz(void){
+  APP_LOG(APP_LOG_LEVEL_DEBUG, "buzz() fire");
+  uint32_t* segmentsPtr;
+  int len = 2;
+  uint32_t segments[]  = {50, 50};
+  segmentsPtr = segments;
+  VibePattern pattern = {
+      .durations = segmentsPtr,
+      .num_segments = len,//ARRAY_LENGTH(segmentsPtr),
+  };
+  vibes_enqueue_custom_pattern(pattern);
+}
+
 //Buzzzzź
 static void buzzAchieved(void){
     uint32_t segments[] = {300, 150, 150, 120, 150, 300, 400};
@@ -44,16 +57,35 @@ static void setTodayTimeAndDate(TextLayer * text_time, TextLayer * text_date){
 }
 
 static void worker_message_handler(uint16_t type, AppWorkerMessage *data) {
-  LastStepNumberFromBackground = data->data0;
-  static char s_buffer[32];
-  snprintf(s_buffer, sizeof(s_buffer), "%d", LastStepNumberFromBackground);
-  text_layer_set_text(s_text_todayStepNumber, s_buffer);
+  //Message rcived from background worker!
+  APP_LOG(APP_LOG_LEVEL_DEBUG, "Message recive from background worker StepNumber: %d",(int)type);
+  if ((int)type == 1) {
+    LastStepNumberFromBackground = data->data0;
+    static char s_buffer[32];
+    snprintf(s_buffer, sizeof(s_buffer), "%d", LastStepNumberFromBackground);
+    text_layer_set_text(s_text_todayStepNumber, s_buffer);
+    APP_LOG(APP_LOG_LEVEL_DEBUG, "Message recive from background worker StepNumber: %d IsSleeping: %d, Need Buzz: %d",(int)data->data0,(bool)data->data1,(bool)data->data2);
+    bool inActiveBuzz = persist_exists(10) ? persist_read_bool(10) : false;
+    if(inActiveBuzz){
+      buzz();
+    }
+    //Reach to your daily goal
+    bool reachToYourGoal = persist_exists(11) ? persist_read_bool(11) : false;
+    if(reachToYourGoal){
+      buzzAchieved();
+    }
+  }
 }
 
 static void callOnGoalChanges(int newgoal){
   static char str_goalStep[8];
   snprintf(str_goalStep,sizeof(str_goalStep), "%d",ReadGoalSteps(8000));
   text_layer_set_text(s_text_goalNumber, str_goalStep);
+
+  AppWorkerMessage msg_data = {
+    .data0 = newgoal
+  };
+  app_worker_send_message(2, &msg_data);
 }
 
 void goal_selected(struct NumberWindow *numberWindow, void *context){
@@ -76,7 +108,7 @@ static void prv_select_click_handler(ClickRecognizerRef recognizer, void *contex
   int32_t savedGoalValue = ReadGoalSteps(8000);
   number_window_set_value(s_window_goals, savedGoalValue);
   number_window_set_max(s_window_goals, 18000);
-  number_window_set_min(s_window_goals, 8000);
+  number_window_set_min(s_window_goals, 0);
   number_window_set_step_size(s_window_goals,250);
   window_stack_push((Window*)s_window_goals, true);
 

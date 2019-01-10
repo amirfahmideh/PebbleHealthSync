@@ -130,6 +130,10 @@ void processAccelerometerData(AccelData* acceleration, uint32_t size)
         if(totalSteps >= dailyGoal && !dailyGoalBuzzed){
             dailyGoalBuzzed = true;
             // buzzAchieved();
+            persist_write_int(11, true);
+        }
+        else {
+            persist_write_int(11, false);
         }
         if(steps > 0){
             updateSteps();
@@ -166,6 +170,7 @@ void processAccelerometerData(AccelData* acceleration, uint32_t size)
 // This one is pretty accurate, giving about 5-8% less steps, but counts some false steps that compensates it.
 void processAccelerometerDataWorking(AccelData* acceleration, uint32_t size)
 {
+    APP_LOG(APP_LOG_LEVEL_DEBUG, "Find me in code if you see me dude!!!");
     float evMax = 0;
     float evMin = 5000000;
     float evMean = 0;
@@ -232,87 +237,92 @@ void processAccelerometerDataWorking(AccelData* acceleration, uint32_t size)
 }
 
 static void update_time(void) {
-    APP_LOG(APP_LOG_LEVEL_DEBUG, "Update_Time() runs in background!");
+  APP_LOG(APP_LOG_LEVEL_DEBUG, "Update_Time() runs in background!");
   // Get a tm structure
   time_t temp = time(NULL);
   struct tm *tick_time = localtime(&temp);
+  if(tick_time->tm_min == lastMinute){
+      return;
+  }
+  lastMinute = tick_time->tm_min;
+  //isSleeping = (totalEv/10 < 1600); //sleepCounterPerPeriod > otherCounterPerPeriod*1.4; // or make it = otherCounterPerPeriod > 20?
+  //totalEv = 0;
+  isSleeping = (sleepCounterPerPeriod > 56);
+  minuteCounter++;
+  stepsPerPeriod = totalSteps - oldSteps;
+  oldSteps = totalSteps;
+  if(stepsPerPeriod > 50){ // count active if you made more than 40 steps per minute
+      segmentsInactive -= stepsPerPeriod/4;// 30;
+      activeMinutes++;
+      isMoving = true;
+      if(segmentsInactive <= 0){
+          segmentsInactive = 0;
+      }
+      needBuzz = false;
+      buzzNo = 0;
+  }else if(stepsPerPeriod < 30 && !isSleeping){ // less than 20 steps - you're inactive
+      segmentsInactive++;
+      //segmentsInactive += 14; // TEST
+      isMoving = false;
+  }else{
+      isMoving = false;
+  }
+  stepsPerPeriod = 0;
+  sleepCounterPerPeriod = 0;
+  otherCounterPerPeriod = 0;
+  if(segmentsInactive > 120){
+      segmentsInactive = 120; // to reset the timer you need 360 steps max
+  }
+  if(!needBuzz && segmentsInactive > 59 && !isMoving){
+      // buzz
+      needBuzz = true;
+      minuteCounter = 0;
+  }
+  if(!isSleeping && needBuzz && minuteCounter % 6 == 0){
+      //buzz(); xxx
+      minuteCounter = 0;
+      persist_write_bool(10, true);
+  }
+  else {
+      persist_write_bool(10, false);
+  }
+  if(dayNumber != tick_time->tm_yday){
+      // Next day, reset all
+      if(totalSteps < dailyGoal){ // reduce your next daily goal by 5%
+          dailyGoal *= 0.95;
+          daysNo++;
+          persist_write_int(1, daysNo);
+      }else{
+          dailyGoal *= 1.05;
+          daysYes++;
+          persist_write_int(2, daysYes);
+      }
+      dailyGoal = ceil(dailyGoal/10)*10;
 
-    if(tick_time->tm_min == lastMinute){
-        return;
-    }
-    lastMinute = tick_time->tm_min;
-    //isSleeping = (totalEv/10 < 1600); //sleepCounterPerPeriod > otherCounterPerPeriod*1.4; // or make it = otherCounterPerPeriod > 20?
-    //totalEv = 0;
-    isSleeping = (sleepCounterPerPeriod > 56);
-    minuteCounter++;
-    stepsPerPeriod = totalSteps - oldSteps;
-    oldSteps = totalSteps;
-    if(stepsPerPeriod > 50){ // count active if you made more than 40 steps per minute
-        segmentsInactive -= stepsPerPeriod/4;// 30;
-        activeMinutes++;
-        isMoving = true;
-        if(segmentsInactive <= 0){
-            segmentsInactive = 0;
-        }
-        needBuzz = false;
-        buzzNo = 0;
-    //}else if(stepsPerPeriod < 2){// what if it is night?
-    //    isMoving = false;
-    }else if(stepsPerPeriod < 30 && !isSleeping){ // less than 20 steps - you're inactive
-        segmentsInactive++;
-        //segmentsInactive += 14; // TEST
-        isMoving = false;
-    }else{
-        isMoving = false;
-    }
-    stepsPerPeriod = 0;
-    sleepCounterPerPeriod = 0;
-    otherCounterPerPeriod = 0;
-    if(segmentsInactive > 120){
-        segmentsInactive = 120; // to reset the timer you need 360 steps max
-    }
-    if(!needBuzz && segmentsInactive > 59 && !isMoving){
-        // buzz
-        needBuzz = true;
-        minuteCounter = 0;
-    }
-    if(!isSleeping && needBuzz && minuteCounter % 6 == 0){
-        //buzz(); xxx
-        minuteCounter = 0;
-    }
-    if(dayNumber != tick_time->tm_yday){
-        // Next day, reset all
-        if(totalSteps < dailyGoal){ // reduce your next daily goal by 5%
-            dailyGoal *= 0.95;
-            daysNo++;
-            persist_write_int(1, daysNo);
-        }else{
-            dailyGoal *= 1.05;
-            daysYes++;
-            persist_write_int(2, daysYes);
-        }
-        dailyGoal = ceil(dailyGoal/10)*10;
-
-        dayNumber = tick_time->tm_yday;
-        totalSteps = 0;
-        oldSteps = 0;
-        activeMinutes = 0;
-        dailyGoalBuzzed = false;
-    }
-
-    updateSteps();
+      dayNumber = tick_time->tm_yday;
+      totalSteps = 0;
+      oldSteps = 0;
+      activeMinutes = 0;
+      dailyGoalBuzzed = false;
+  }
+  updateSteps();
 }
 
 static void tick_handler(struct tm *tick_time, TimeUnits units_changed) {
-  APP_LOG(APP_LOG_LEVEL_DEBUG, "Timer Tick!");
   update_time();
 }
 
-static void worker_init(void) {
-    APP_LOG(APP_LOG_LEVEL_DEBUG, "Worker initailize");
-    // accel_data_service_subscribe(num_samples, data_handler);
-    // accel_service_set_sampling_rate(ACCEL_SAMPLING_10HZ);
+static void foreground_message_handler(uint16_t type, AppWorkerMessage *data) {
+  if ((int)type == 2)
+  {
+    int newGoalNumner = data->data0;
+    dailyGoal = newGoalNumner;
+    dailyGoalBuzzed = false;
+    APP_LOG(APP_LOG_LEVEL_DEBUG, "New goal recive from Foreground %d",newGoalNumner);
+  }
+}
 
+static void worker_init(void) {
 	   // Load persistent values
     daysNo = persist_exists(1) ? persist_read_int(1) : 1;
     daysYes = persist_exists(2) ? persist_read_int(2) : 1;
@@ -328,12 +338,11 @@ static void worker_init(void) {
     dayNumber = persist_exists(9) ? persist_read_int(9) : 0;
     dailyGoal = persist_exists(111) ? persist_read_int(111) : 8250;
 
+    // APP_LOG(APP_LOG_LEVEL_DEBUG, "Goal number which read by worker is %d",(int)dailyGoal);
 
 	  // Setup accelerometer API
 	  accel_data_service_subscribe(BATCH_SIZE, &processAccelerometerData);
 	  accel_service_set_sampling_rate(ACCEL_SAMPLING_10HZ);
-    APP_LOG(APP_LOG_LEVEL_DEBUG, "Data Handle add accel");
-
     tick_timer_service_subscribe(MINUTE_UNIT, tick_handler);
     // battery_state_service_subscribe(battery_handler);
 
@@ -341,14 +350,15 @@ static void worker_init(void) {
     //text_layer_set_text(s_steps_layer, buffer);
     updateSteps();
     update_time();
+
+    //Subscripe for changing goal number from foreground;
+    app_worker_message_subscribe(foreground_message_handler);
 }
 
 static void worker_deinit(void) {
 	if (DEBUG) {
 		char msg[] = "deinit() called";
-		// APP_LOG(APP_LOG_LEVEL_DEBUG, "DEBUG", 0, msg, mWindow);
 	}
-
 	// Save persistent values
   persist_write_int(5, totalSteps);
   persist_write_int(6, segmentsInactive);
@@ -356,9 +366,9 @@ static void worker_deinit(void) {
   persist_write_int(8, oldSteps);
   persist_write_int(9, dayNumber);
   // persist_write_int(10, dailyGoal);
-
 	accel_data_service_unsubscribe();
   tick_timer_service_unsubscribe();
+  app_worker_message_unsubscribe();
   // battery_state_service_unsubscribe();
 }
 

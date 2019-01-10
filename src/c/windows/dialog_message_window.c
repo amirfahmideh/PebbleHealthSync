@@ -1,7 +1,6 @@
 /**
  * Example implementation of the dialog message UI pattern.
  */
-
 #include "dialog_message_window.h"
 
 static Window *s_main_window;
@@ -37,7 +36,7 @@ static void window_load(Window *window) {
   layer_set_update_proc(s_background_layer, background_update_proc);
   layer_add_child(window_layer, s_background_layer);
 
-  s_icon_bitmap = gbitmap_create_with_resource(RESOURCE_ID_WARNING);
+  s_icon_bitmap = gbitmap_create_with_resource(RESOURCE_ID_TROPHY);
   GRect bitmap_bounds = gbitmap_get_bounds(s_icon_bitmap);
 
   s_icon_layer = layer_create(PBL_IF_ROUND_ELSE(

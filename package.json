@@ -46,8 +46,8 @@
        },
        {
         "type": "bitmap",
-        "name": "WARNING",
-        "file": "images/warning.png"
+        "name": "TROPHY",
+        "file": "images/trophy.png"
        }
       ]
     }

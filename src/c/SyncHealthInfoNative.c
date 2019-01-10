@@ -27,8 +27,6 @@ static void buzz(void){
   };
   vibes_enqueue_custom_pattern(pattern);
 }
-
-//Buzzzzź
 static void buzzAchieved(void){
     uint32_t segments[] = {300, 150, 150, 120, 150, 300, 400};
     //Create a VibePattern structure with the segments and length of the pattern as fields
@@ -38,6 +36,8 @@ static void buzzAchieved(void){
     };
     //Trigger the custom pattern to be executed
     vibes_enqueue_custom_pattern(pattern);
+    //Show information
+    dialog_message_window_push();
 }
 
 //Set today date and time!
@@ -111,7 +111,6 @@ static void prv_select_click_handler(ClickRecognizerRef recognizer, void *contex
   number_window_set_min(s_window_goals, 0);
   number_window_set_step_size(s_window_goals,250);
   window_stack_push((Window*)s_window_goals, true);
-
 }
 
 static void prv_up_click_handler(ClickRecognizerRef recognizer, void *context) {
@@ -135,8 +134,8 @@ static void prv_window_load(Window *window) {
   Layer *window_layer = window_get_root_layer(window);
   GRect bounds = layer_get_bounds(window_layer);
 
-  s_text_layer = text_layer_create(GRect(0, 0, bounds.size.w, 60));
-  s_text_persianDate = text_layer_create(GRect(0, 60, bounds.size.w, 26));
+  s_text_layer = text_layer_create(GRect(0, 20, bounds.size.w, 54));
+  s_text_persianDate = text_layer_create(GRect(0, 74, bounds.size.w, 26));
 
 
   s_text_todayStepNumber = text_layer_create(GRect(0, 102, bounds.size.w, 28));
@@ -152,6 +151,8 @@ static void prv_window_load(Window *window) {
   text_layer_set_text(s_text_persianDate, "1400/01/03");
   text_layer_set_font(s_text_persianDate, fonts_get_system_font(FONT_KEY_GOTHIC_18_BOLD));
   text_layer_set_text_alignment(s_text_persianDate, GTextAlignmentCenter);
+  text_layer_set_background_color(s_text_persianDate,GColorBlack);
+  text_layer_set_text_color(s_text_persianDate, GColorWhite);
 
   // text_layer_set_background_color(s_text_todayStepNumber,GColorBlack);
   text_layer_set_text(s_text_todayStepNumber, "4679");
@@ -243,11 +244,8 @@ static void prv_deinit(void) {
   app_worker_message_unsubscribe();
 }
 
-
-
 int main(void) {
   prv_init();
-  APP_LOG(APP_LOG_LEVEL_DEBUG, "Done initializing, pushed window: %p", s_window);
   app_event_loop();
   prv_deinit();
 }

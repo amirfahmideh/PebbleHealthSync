@@ -10,7 +10,6 @@ const char *j_month_name[13] = {"",
                                 "Tir", "Mordad", "Shahrivar",
                                 "Mehr", "Aban", "Azar",
                                 "Dey", "Bahman", "Esfand"};
-
 void gregorian_to_jalali(int *j_y, int *j_m, int *j_d,
                          int  g_y, int  g_m, int  g_d)
 {
@@ -18,7 +17,6 @@ void gregorian_to_jalali(int *j_y, int *j_m, int *j_d,
    int jy, jm, jd;
    long g_day_no, j_day_no;
    int j_np;
-
    int i;
 
    gy = g_y-1600;

@@ -1,5 +1,6 @@
 #include <pebble_worker.h>
 #include <math.h>
+#include "settingHeader.h"
 #define DEBUG false
 #define BATCH_SIZE 10
 
@@ -130,10 +131,10 @@ void processAccelerometerData(AccelData* acceleration, uint32_t size)
         if(totalSteps >= dailyGoal && !dailyGoalBuzzed){
             dailyGoalBuzzed = true;
             // buzzAchieved();
-            persist_write_int(11, true);
+            persist_write_int(SETTING_DAILYGOALBUZZED, true);
         }
         else {
-            persist_write_int(11, false);
+            persist_write_int(SETTING_DAILYGOALBUZZED, false);
         }
         if(steps > 0){
             updateSteps();
@@ -281,21 +282,21 @@ static void update_time(void) {
   if(!isSleeping && needBuzz && minuteCounter % 6 == 0){
       //buzz(); xxx
       minuteCounter = 0;
-      persist_write_bool(10, true);
+      persist_write_bool(SETTING_INACTIVEBUZZ, true);
   }
   else {
-      persist_write_bool(10, false);
+      persist_write_bool(SETTING_INACTIVEBUZZ, false);
   }
   if(dayNumber != tick_time->tm_yday){
       // Next day, reset all
-      if(totalSteps < dailyGoal){ // reduce your next daily goal by 5%
+      if(totalSteps < dailyGoal) { // reduce your next daily goal by 5%
           dailyGoal *= 0.95;
           daysNo++;
-          persist_write_int(1, daysNo);
+          persist_write_int(SETTING_NODAYS, daysNo);
       }else{
           dailyGoal *= 1.05;
           daysYes++;
-          persist_write_int(2, daysYes);
+          persist_write_int(SETTING_YESDAYS, daysYes);
       }
       dailyGoal = ceil(dailyGoal/10)*10;
 
@@ -324,18 +325,18 @@ static void foreground_message_handler(uint16_t type, AppWorkerMessage *data) {
 
 static void worker_init(void) {
 	   // Load persistent values
-    daysNo = persist_exists(1) ? persist_read_int(1) : 1;
-    daysYes = persist_exists(2) ? persist_read_int(2) : 1;
+    daysNo = persist_exists(SETTING_NODAYS) ? persist_read_int(SETTING_NODAYS) : 1;
+    daysYes = persist_exists(SETTING_YESDAYS) ? persist_read_int(SETTING_YESDAYS) : 1;
 
-	  totalSteps = persist_exists(5) ? persist_read_int(5) : 0;
-    segmentsInactive = persist_exists(6) ? persist_read_int(6) : 0;
+	  totalSteps = persist_exists(SETTING_TOTALSTEPS) ? persist_read_int(SETTING_TOTALSTEPS) : 0;
+    segmentsInactive = persist_exists(SETTING_INACTIVESEGMENTS) ? persist_read_int(SETTING_INACTIVESEGMENTS) : 0;
     if(segmentsInactive > 90){
         segmentsInactive = 90;
     }
     //segmentsInactive = 0;
-    activeMinutes = persist_exists(7) ? persist_read_int(7) : 0;
-    oldSteps = persist_exists(8) ? persist_read_int(8) : 0;
-    dayNumber = persist_exists(9) ? persist_read_int(9) : 0;
+    activeMinutes = persist_exists(SETTING_ACTIVEMINUTES) ? persist_read_int(SETTING_ACTIVEMINUTES) : 0;
+    oldSteps = persist_exists(SETTING_OLDSTEPS) ? persist_read_int(SETTING_OLDSTEPS) : 0;
+    dayNumber = persist_exists(SETTING_DAYNUMBER) ? persist_read_int(SETTING_DAYNUMBER) : 0;
     dailyGoal = persist_exists(111) ? persist_read_int(111) : 8250;
 
     // APP_LOG(APP_LOG_LEVEL_DEBUG, "Goal number which read by worker is %d",(int)dailyGoal);
@@ -360,11 +361,11 @@ static void worker_deinit(void) {
 		char msg[] = "deinit() called";
 	}
 	// Save persistent values
-  persist_write_int(5, totalSteps);
-  persist_write_int(6, segmentsInactive);
-  persist_write_int(7, activeMinutes);
-  persist_write_int(8, oldSteps);
-  persist_write_int(9, dayNumber);
+  persist_write_int(SETTING_TOTALSTEPS, totalSteps);
+  persist_write_int(SETTING_INACTIVESEGMENTS, segmentsInactive);
+  persist_write_int(SETTING_ACTIVEMINUTES, activeMinutes);
+  persist_write_int(SETTING_OLDSTEPS, oldSteps);
+  persist_write_int(SETTING_DAYNUMBER, dayNumber);
   // persist_write_int(10, dailyGoal);
 	accel_data_service_unsubscribe();
   tick_timer_service_unsubscribe();

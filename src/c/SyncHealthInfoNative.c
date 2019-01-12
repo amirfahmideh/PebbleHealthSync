@@ -2,6 +2,7 @@
 #include "persiancalendar.h"
 #include "windows/dialog_message_window.h"
 #include "local_storage.h"
+#include "settingHeader.h"
 
 // #include "worker/step_count_worker.c"
 static Window *s_window;
@@ -65,12 +66,12 @@ static void worker_message_handler(uint16_t type, AppWorkerMessage *data) {
     snprintf(s_buffer, sizeof(s_buffer), "%d", LastStepNumberFromBackground);
     text_layer_set_text(s_text_todayStepNumber, s_buffer);
     APP_LOG(APP_LOG_LEVEL_DEBUG, "Message recive from background worker StepNumber: %d IsSleeping: %d, Need Buzz: %d",(int)data->data0,(bool)data->data1,(bool)data->data2);
-    bool inActiveBuzz = persist_exists(10) ? persist_read_bool(10) : false;
+    bool inActiveBuzz = persist_exists(SETTING_DAILYGOALBUZZED) ? persist_read_bool(SETTING_DAILYGOALBUZZED) : false;
     if(inActiveBuzz){
       buzz();
     }
     //Reach to your daily goal
-    bool reachToYourGoal = persist_exists(11) ? persist_read_bool(11) : false;
+    bool reachToYourGoal = persist_exists(SETTING_DAILYGOALBUZZED) ? persist_read_bool(SETTING_DAILYGOALBUZZED) : false;
     if(reachToYourGoal){
       buzzAchieved();
     }

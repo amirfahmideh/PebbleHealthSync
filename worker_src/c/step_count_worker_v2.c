@@ -70,9 +70,9 @@ void processAccelerometerData(AccelData* acceleration, uint32_t size)
     float evMax = 0;
     float evMin = 5000000;
     float evMean = 0;
-    float ev[10];
-    float evAv[10];
-    for(uint32_t i=0;i<size&&i<10;i++){
+    float ev[BATCH_SIZE];
+    float evAv[BATCH_SIZE];
+    for(uint32_t i=0;i<size&&i<BATCH_SIZE;i++){
         ev[i] = my_sqrt(acceleration[i].x*acceleration[i].x + acceleration[i].y*acceleration[i].y + acceleration[i].z*acceleration[i].z);
     }
     // Need to eliminate slow change and detect peaks...
@@ -82,7 +82,7 @@ void processAccelerometerData(AccelData* acceleration, uint32_t size)
     for(int i=2;i<10;i++){
         evAv[i] = (ev[i]+ev[i-1]+ev[i-2])/3;
     }
-    lastEv = ev[9];
+    lastEv = ev[BATCH_SIZE-1];
     /*
     // This one is OK, but requires more CPU
     evAv[0] = (lastEv + ev[0])/2;
@@ -92,7 +92,7 @@ void processAccelerometerData(AccelData* acceleration, uint32_t size)
     lastEv = ev[9];
     */
     // 2. Find peaks above average line and higher than minimum energy
-    for(int i=0;i<10;i++){
+    for(int i=0;i<BATCH_SIZE;i++){
         // 3 steps per second = 180 steps per minute maximum, who can run faster?
         // Well, tests show that it drops steps somehow... Back to 1. 0.8 and 24.000 are pure empirical values.
         // Values greater than 24.000 give less false detections, but can skip steps if you, for example, have something
